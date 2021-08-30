@@ -1,4 +1,4 @@
-#include "obstructionPredictor.hpp"
+#include "obstructionPredictor/obstructionPredictor.hpp"
 
 bool ObstructionPredictor::IsReady() const {
   return isReady;
