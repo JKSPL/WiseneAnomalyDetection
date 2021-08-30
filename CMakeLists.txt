@@ -21,3 +21,7 @@ target_link_libraries(runUnitTests gtest gtest_main)
 target_link_libraries(runUnitTests wisene_lib)
 
 add_test(UnitTests runUnitTests)
+
+add_subdirectory(report)
+add_custom_target(Report)
+add_dependencies(Report final_report_pdf)
