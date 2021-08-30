@@ -1,3 +1,4 @@
+// stdin tool for testing obstruction predictor
 #include <iostream>
 #include <fstream>
 #include <iomanip>
