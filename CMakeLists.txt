@@ -23,5 +23,5 @@ target_link_libraries(runUnitTests wisene_lib)
 add_test(UnitTests runUnitTests)
 
 add_subdirectory(report)
-add_custom_target(Report)
-add_dependencies(Report final_report_pdf)
+add_custom_target(report)
+add_dependencies(report final_report_pdf)
