@@ -58,14 +58,14 @@ const vector<double> AUTO_COEFFICIENTS = {
 struct FullAnomalyDetector {
     const int HISTORY_SIZE = 500;
 
-    time_t sampled_window_time;
+    uint64_t sampled_window_time;
     vector<double> last_window;
     double previous_measurement = 0;
     double obstruction = 0;
 
     deque<double> resampled_measurements;
     // measurement to jest różnica bazy od pomiaru
-    AnomalyData add(time_t timestamp, double measurement);
+    AnomalyData add(uint64_t timestamp, double measurement);
 };
 
 #endif //WISENE_AD_UTILS_H

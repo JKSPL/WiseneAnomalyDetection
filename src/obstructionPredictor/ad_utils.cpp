@@ -55,8 +55,8 @@ auto_regression_ad(const vector<double> &measurements, const vector<double> &coe
     return threshold_ad({abs(prediction - last_v)}, numeric_limits<double>::lowest(), max_diff);
 }
 
-AnomalyData FullAnomalyDetector::add(time_t timestamp, double measurement) {
-    time_t current_sampled_window_time = timestamp - timestamp % SAMPLING_SECONDS;
+AnomalyData FullAnomalyDetector::add(uint64_t timestamp, double measurement) {
+    uint64_t current_sampled_window_time = timestamp - timestamp % SAMPLING_SECONDS;
     if (!last_window.empty() && sampled_window_time != current_sampled_window_time) {
         resampled_measurements.push_back(median(last_window));
         if (static_cast<int>(resampled_measurements.size()) > HISTORY_SIZE) {
@@ -104,5 +104,5 @@ AnomalyData FullAnomalyDetector::add(time_t timestamp, double measurement) {
         }
     }
     previous_measurement = measurement;
-    return AnomalyData{obstruction > 0.5, measurement - obstruction};
+    return AnomalyData{abs(obstruction) > 0.5, measurement - obstruction};
 }
