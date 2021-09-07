@@ -1,2 +1,4 @@
 /report_build/
 /cmake-build-debug/
+/build/
+/report/build/
