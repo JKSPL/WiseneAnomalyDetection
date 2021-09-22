@@ -1,4 +1,4 @@
-\documentclass[12pt, a4paper]{article}
+\documentclass[10pt, a4paper]{article}
 \usepackage{lingmacros}
 \usepackage{diagbox}
 \usepackage{tree-dvips}
@@ -9,6 +9,8 @@
 \usepackage{multirow}
 \usepackage{biblatex}
 \usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
 \usepackage{hyperref}
 \usepackage{cleveref}
 \usepackage{pgfplots,wrapfig}
@@ -23,13 +25,41 @@
     \section{Wstęp}\label{sec:wstep}
     \input{wstep.tex}
 
+
     \section{Analiza danych}\label{sec:analiza-danych}
     \input{analiza-danych}
 
+
     \section{Metodologia i algorytm}\label{sec:metodologia-i-algorytm}
     \input{metodologia-i-algorytm}
-
-    \section{Realizacja}
-    \input{realizacja}
-
+    \printbibliography
+    \clearpage
+    \appendix
+    \section{Przykłady danych}\label{sec:raw-examples}
+    \begin{figure}
+        \includegraphics{img_example_812.png}
+        \captionof{figure}{Zestawienie wykresów dla JTI OTP - Gostków Stary/P-3.
+        \label{fig:example812}}
+    \end{figure}
+    \begin{figure}
+        \includegraphics{img_example_201.png}
+        \captionof{figure}{Zestawienie wykresów dla C-Lublin - Lublin /P4.
+        \label{fig:example201}}
+    \end{figure}
+    \begin{figure}
+        \includegraphics{img_example_305.png}
+        \captionof{figure}{Zestawienie wykresów dla C-Wr-Korona - Wrocław/P-6.
+        \label{fig:example305}}
+    \end{figure}
+%    {\centering
+%    \null\vfill
+%    \includegraphics[width=4.5in,201 height=3in]{img_example_812.png}
+%    \captionof{figure}{Zestawienie wykresów dla JTI OTP - Gostków Stary/P-3.
+%    \label{sec:figmodel1active0yrs}}
+%    \vfill
+%    \includegraphics[width=4.5in, height=3in]{example12.png}
+%    \captionof{figure}{As-Built Pristine Passive Abutment Fragility Curve%
+%    \label{sec:figmodel1passive0yrs}}
+%    \vfill\null
+%    }
 \end{document}

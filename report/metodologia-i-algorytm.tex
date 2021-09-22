@@ -1,85 +1,145 @@
-\section{Metodologia i algorytm}
 \subsection{Wstęp}
-Każdy zestaw danych składa się z kilku szeregów czasowych. W tych szeregach czasowych mamy zidentyfikować anomalie (ang.\ \emph{outlier}, \emph{anomaly}). Jest to znany problem w analizie statystycznej, do którego mamy do dyspozycji opracowane wcześniej narzędzia. Dziedziną zajmującą się rozpoznawaniem anomalii jest \emph{intervention analysis}.
+Każdy zestaw danych składa się z kilku szeregów czasowych.
+W tych szeregach czasowych mamy zidentyfikować anomalie (ang.\ \emph{outlier}, \emph{anomaly}).
+Jest to znany problem w analizie statystycznej, do którego mamy do dyspozycji opracowane wcześniej narzędzia.
+Dziedziną zajmującą się rozpoznawaniem anomalii jest \emph{intervention analysis}.
 
-Prawdopodobnie najważniejszą pracą w tej dziedzinie jest praca Ruey S. Tsaya \citetitle{https://doi.org/10.1002/for.3980070102} \cite{https://doi.org/10.1002/for.3980070102}. Jest ona powszechnie cytowanym fundamentem współczesnej analizy anomalii w szeregach czasowych.
+Prawdopodobnie najważniejszą pracą w tej dziedzinie jest praca Ruey S. Tsaya~\citetitle{https://doi.org/10.1002/for.3980070102}~\cite{https://doi.org/10.1002/for.3980070102}.
+Jest ona powszechnie cytowana i fundamentem współczesnej analizy anomalii w szeregach czasowych.
 
-Najistotniejsze jest zidentyfikować, czym tak naprawdę jest zastawienie z punktu widzenia intervention analysis. Zastawienie tymczasowo zmienia bazę pomiarów miernika. Oznacza to, że na czas zastawienia, pomiary są zmienione o pewną wysokość. Używając terminologii z ww. pracy jest to klasyfikowane jako \emph{level shift}. Jeśli zastawienie jest krótkotrwałe, to bardziej pasuje termin \emph{spike}.
+Najistotniejsze jest zidentyfikować, czym tak naprawdę jest zastawienie z punktu widzenia intervention analysis.
+Zastawienie tymczasowo zmienia bazę pomiarów miernika.
+Oznacza to, że na czas zastawienia, pomiary są zmienione o pewną wysokość.
+Używając terminologii z ww.\ pracy jest to klasyfikowane jako \emph{level shift}.
+Jeśli zastawienie jest krótkotrwałe, to bardziej pasuje termin \emph{spike}.
 
-Praca Tsaya opiera się głównie na modelach \emph{ARMA}. Model ARMA jest połączeniem dwóch modeli AR i MA, czyli autoregresji i średniej kroczącej. Model (a konkretnie część MA) można stosować pod warunkiem, że analizowany szereg czasowy jest stacjonarny.
+Praca Tsaya opiera się głównie na modelach \emph{ARMA}.
+Model ARMA jest połączeniem dwóch modeli AR i MA, czyli autoregresji i średniej kroczącej.
+Model (a konkretnie część MA) można stosować pod warunkiem, że analizowany szereg czasowy jest stacjonarny.
 
-Dodatkowo, by nasze rozwiązanie było możliwe do zastosowania w praktyce, musimy raportować wyniki na bieżąco, tj.\ w trybie \textbf{online}. Jest to kluczowe, ponieważ zmniejszy to użyteczność niektórych potencjalnych modeli.
+Co więcej, by nasze rozwiązanie było możliwe do zastosowania w praktyce, musimy raportować wyniki na bieżąco, tj.\ w trybie \textbf{online}.
+Jest to kluczowe, ponieważ zmniejszy to użyteczność niektórych potencjalnych modeli.
+
 \subsection{Skorelowanie urządzeń}
-Jako że na urządzenia z pojedynczego budynku oddziałują praktycznie te same warunki atmosferyczne, to można by, zamiast modelu rozpatrującego każde z urządzeń osobno, spróbować wywnioskować anomalie z braku synchronizacji ruchów między urządzeniami.
+Na urządzenia z pojedynczego budynku oddziałują praktycznie te same warunki atmosferyczne, więc zamiast modelu rozpatrującego każde z urządzeń osobno, można spróbować wywnioskować anomalie z braku synchronizacji ruchów między urządzeniami.
 
-Nie zdecydowaliśmy się na to, ze względu na dwa czynniki. Po pierwsze model mógłby się przeuczyć (ang.\ \emph{overfit}) na podstawie tej własności, co sprawiłoby, że fałszywie raportowałby zastawienie w przypadku, gdy tylko część dachu jest obciążona np.\ materiałami budowlanymi, zamiast śniegiem. Po drugie trenowanie modelu na wielowymiarowym szeregu czasowym jest dużo trudniejsze i łatwiej o przeuczenie się. Dlatego właśnie w praktyce, w takich sytuacjach, rozpatruje się szeregi czasowe niezależnie, o ile jest taka możliwość.
+Nie zdecydowaliśmy się na to, ze względu na dwa czynniki.
+Po pierwsze, model mógłby się przeuczyć (ang.\ \emph{overfit}) na podstawie tej własności, co sprawiłoby, że fałszywie raportowałby zastawienie w przypadku, gdy tylko część dachu jest obciążona np.\ materiałami budowlanymi, zamiast śniegiem.
+Po drugie, trenowanie modelu na wielowymiarowym szeregu czasowym jest dużo trudniejsze ze względu na wykładniczo rosnącą przestrzeń stanów, a dysponujemy ograniczonymi danymi.
+Dlatego właśnie w praktyce, w takich sytuacjach, rozpatruje się szeregi czasowe niezależnie, o ile jest taka możliwość.
+
 \subsection{Metoda rozstępu ćwiartkowego}
-Metoda rozstępu ćwiartkowego (ang.\ IQR -- Interquartile range) jest jedną z najprostszych metod rozpoznawania anomalii w szeregu czasowym. Po poszeregowaniu historycznych danych na kwartyle $Q_1, Q_2, Q_3, Q_4$, definiujemy $\mathit{IQR}:= Q_3 - Q_1$, nazywane także \emph{midspread}. Następnie jesteśmy w stanie wykonać prosty Interquartile range test -- sprawdzamy, czy analizowany pomiar jest pomiędzy $Q_1 - c \cdot \mathit{IQR}$ i $Q_3 + c \cdot \mathit{IQR}$, gdzie $c$ to dopuszczalny margines. W naszym przypadku przyjęliśmy $c=3$, by tolerować szeroki zakres obserwacji.
+Metoda rozstępu ćwiartkowego (ang.\ IQR -- Interquartile range) jest jedną z najprostszych metod rozpoznawania anomalii w szeregu czasowym.
+Po poszeregowaniu historycznych danych na kwartyle $Q_1, Q_2, Q_3, Q_4$, definiujemy $\mathit{IQR}:= Q_3 - Q_1$, nazywane także \emph{midspread}.
+Następnie jesteśmy w stanie wykonać prosty Interquartile range test -- sprawdzamy, czy analizowany pomiar jest pomiędzy $Q_1 - c \cdot \mathit{IQR}$ i $Q_3 + c \cdot \mathit{IQR}$, gdzie $c$ to dopuszczalny margines.
+W naszym przypadku przyjęliśmy $c=6$, by tolerować szeroki zakres obserwacji.
+
 \subsection{Zmiana poziomu}\label[]{levelshift}
-Zmiana poziomu (ang.\ \emph{level shift}) jest jednym z głównych typów anomalii analizowanych w pracy \cite{https://doi.org/10.1002/for.3980070102}. By wykrywać takie anomalie, używa się podwójnego przesuwnego okna. Podwójne przesuwne okno jest parametryzowane przez $d$, oznaczające długość skrzydła. Jeśli ostatnie $2d$ pomiarów to $X_1, \ldots X_{2d}$, to lewym skrzydłem jest $X_1, \ldots X_d$, a prawym $X_{d + 1}, \ldots, X_{2d}$. Metryką dla takiego podwójnego przesuwnego okna jest różnica median prawego i lewego skrzydła. Następnie dla tej metryki używamy metody rozstępu ćwiartkowego.
+Zmiana poziomu (ang.\ \emph{level shift}) jest jednym z głównych typów anomalii analizowanych w pracy \cite{https://doi.org/10.1002/for.3980070102}.
+By wykrywać takie anomalie, używa się podwójnego przesuwnego okna.
+Podwójne przesuwne okno jest parametryzowane przez $d$, oznaczające długość skrzydła.
+Jeśli ostatnie $2d$ pomiarów to $X_1, \ldots X_{2d}$, to lewym skrzydłem jest $X_1, \ldots X_d$, a prawym $X_{d + 1}, \ldots, X_{2d}$.
+Metryką dla takiego podwójnego przesuwnego okna jest różnica median prawego i lewego skrzydła.
+Następnie dla tej metryki używamy metody rozstępu ćwiartkowego.
 
-Niestety nie jest to wskaźnik, którego moglibyśmy łatwo użyć w naszym przypadku. Daje on informację z opóźnieniem $d$ obserwacji, ponieważ daje on informację o środkowym elemencie między skrzydłami. Dodatkowo, informacja ta jest zduplikowana -- po niewielkim przesunięciu okna ta metoda nadal notuje anomalię. Przez to ciężko odzyskać faktyczny poziom ugięcia dachu.
+Niestety nie jest to wskaźnik, którego moglibyśmy łatwo użyć w naszym przypadku.
+Daje on informację z opóźnieniem $d$ obserwacji, ponieważ daje on informację o środkowym elemencie między skrzydłami.
+Co więcej, informacja ta jest zduplikowana -- po niewielkim przesunięciu okna ta metoda nadal notuje anomalię.
+Przez to ciężko odzyskać faktyczny poziom ugięcia dachu.
+
 \subsection{Nagłe wzrosty}\label{spike}
-Nagły wzrost (ang.\ \emph{spike}) jest kolejnym typem anomalii rozpatrywanym w pracy \cite{https://doi.org/10.1002/for.3980070102}. Ten typ anomalii jest wykrywany poprzez przesuwne okno, które jest parametryzowane przez $d$ -- jego rozmiar. Jeśli ostatnie $d + 1$ pomiarów to $X_1, \ldots X_{d + 1}$, to oknem jest $X_1, \ldots X_d$. Metryką jest różnica ostatniego elementu $X_{d+1}$ od mediany okna. Dla takiej metryki używamy metody rozstępu ćwiartkowego. Metoda ta jest wykryje zmianę poziomu w najwcześniejszym momencie, ponieważ początek level shift jest również spikem.
-\subsection{Autoregresja}\label{autoregression}
-Autoregresja pozwala sprawdzić, czy obserwacje nie odbiegają od poprzedzających w ramach pewnej funkcji liniowej. Jest parametryzowana przez $d$ -- rozmiar okna. Jeśli ostatnie $d + 1$ pomiarów to $X_1, \ldots X_{d + 1}$, to oknem jest $X_1, \ldots X_d$. Dodatkowo, uczymy się parametrów $c_1, \ldots, c_d$. Metryką jest różnica ostatniego elementu $X_{d+1}$ od kombinacji liniowej $c_1X_1 + c_2X_2 + \ldots + c_dX_d$. Parametrów uczymy się za pomocą regresji liniowej na historycznych danych. Dla metryki używamy metody rozstępu ćwiartkowego. Jest to bardzo precyzyjna metoda, która dobrze działa, jeśli mamy wysoki poziom autokorelacji w szeregu czasowym. W naszym przypadku ten warunek jest spełniony.
-\subsection{Próg}\label{threshold}
-Znając możliwy potencjalny zakres danych, możemy pozbyć się z danych wejściowe najbardziej oczywistych anomalii, które mogłyby zaburzyć bardziej skomplikowane metody jak autoregresja. Każde urządzenie ma maksymalne możliwe ugięcie, po przekroczeniu którego powinien uruchomić się alarm. Możemy ustawić próg na najbardziej oczywiste anomalie na 4-krotność maksymalnego możliwego ugięcia, bo wtedy albo mamy zastawienie, albo dach powinien już się dawno zawalić.
-\subsection{Inżynieria danych}
-Nasze 135 zestawów danych zostało podzielone na dwie części -- treningową i ewaluacyjną. Treningowa część składa się z danych z 50 losowych urządzeń, natomiast pozostałe zostały wykorzystane do ewaluacji. Dane zostały przepróbkowane do okresu 3 godzin.
-\subsection{Rozwiązanie}\label{solution}
-Używamy wskaźników z sekcji \ref{spike}, \ref{autoregression} i \ref{threshold}, i obserwacja jest raportowana jako anomalia, jeśli dowolny z tych wskaźników zwróci, że obserwacja jest anomalią.
-\subsection{Odrzucone rozwiązania}
-Zamiast klasycznej analizy statystycznej, moglibyśmy również spróbować znanych metod uczenia maszynowego, przykładowo sieci neuronowych. Jednakże metody te najczęściej nie radzą sobie z danymi o wysokim poziomie szumu, a z takimi mamy do czynienia w naszym przypadku. Dodatkowo, nie ma problemu z trudnością z interpretowalnością wyników. Zagraniczne korporacje takie jak Facebook nadal używają klasycznych metod statystycznych do wykrywania anomalii \cite{Prophet}, chociaż pojawiają się próby zaadaptowania do współczesnych metod uczenia maszynowego \cite{Neuralprophet}.
+Nagły wzrost (ang.\ \emph{spike}) jest kolejnym typem anomalii rozpatrywanym w pracy \cite{https://doi.org/10.1002/for.3980070102}.
+Ten typ anomalii jest wykrywany poprzez przesuwne okno, które jest parametryzowane przez $d$ -- jego rozmiar.
+Jeśli ostatnie $d + 1$ pomiarów to $X_1, \ldots X_{d + 1}$, to oknem jest $X_1, \ldots X_d$. Metryką jest różnica ostatniego elementu $X_{d+1}$ od mediany okna. Dla takiej metryki używamy metody rozstępu ćwiartkowego.
+Metoda ta jest wykryje zmianę poziomu w najwcześniejszym momencie, ponieważ początek level shift jest również spikem.
 
-Istniejące, bardziej skomplikowane rozwiązania takie jak Prophet Facebooka \cite{Prophet} skupiają się głównie na wahaniach sezonowych (np. weekendy/święta Bożego narodzenia), ponieważ są one przeznaczone dla systemów o dużej skali i nie ma tam konieczności rozpoznania wszystkich anomalii. W naszym przypadku wahania sezonowe mają znaczenie drugorzędne -- mimo że zwykle możemy spodziewać się opadów śniegu w zimie, to nie możemy na tym polegać, gdyż nadmierne obciążenia mogą powstać z innej przyczyny i nadal być niebezpieczne.
+\subsection{Autoregresja}\label{autoregression}
+Autoregresja pozwala sprawdzić, czy obserwacje nie odbiegają od poprzedzających w ramach pewnej funkcji liniowej.
+Jest parametryzowana przez $d$ -- rozmiar okna.
+Jeśli ostatnie $d + 1$ pomiarów to $X_1, \ldots X_{d + 1}$, to oknem jest $X_1, \ldots X_d$.
+Poza tym, model uczy się parametrów $c_1, \ldots, c_d$.
+Metryką jest różnicą ostatniego elementu $X_{d+1}$ od kombinacji liniowej $c_1X_1 + c_2X_2 + \ldots + c_dX_d$.
+Parametrów model uczy się za pomocą regresji liniowej na historycznych danych.
+Po przeliczeniu metryki stosujemy metodę rozstępu ćwiartkowego, by zidentyfikować anomalie.
+Jest to bardzo precyzyjna metoda, która dobrze działa, jeśli mamy wysoki poziom autokorelacji w szeregu czasowym.
+W naszym przypadku ten warunek jest spełniony.
+
+Wadą tego podejścia jest to, że argumentem funkcji liniowej nie powinny być bardzo zaburzone dane.
+Jeden bardzo odstający punkt w oknie autoregresji powoduje zidentyfikowanie wszystkich punktów z okna jako anomalie.
+Dlatego do argumentów funkcji autoregresji stosujemy już poprawione przez model dane.
+Należy zwrócić uwagę, że może to nas narażać na addytywne, narastające błędy.
+
+\subsection{Próg}\label{threshold}
+Znając możliwy potencjalny zakres danych, możemy pozbyć się z danych wejściowe najbardziej oczywistych anomalii, które mogłyby zaburzyć bardziej skomplikowane metody jak autoregresja.
+Każde urządzenie ma maksymalne możliwe ugięcie, po którego przekroczeniu powinien uruchomić się alarm.
+Możemy ustawić próg na najbardziej oczywiste anomalie na 4-krotność maksymalnego możliwego ugięcia, bo wtedy albo mamy zastawienie, albo dach powinien już się dawno zawalić.
+
+\subsection{Inżynieria danych}\label{subsec:inzynieria-danych}
+Nasze 135 zestawów danych zostało podzielone na dwie części -- treningową i ewaluacyjną.
+Treningowa część składa się z danych z 50 losowych urządzeń, natomiast pozostałe zostały wykorzystane do ewaluacji.
+Dane zostały przepróbkowane do stałego okresu 3 godzin.
+
+\subsection{Rozwiązanie}\label{solution}
+Używamy wskaźników z sekcji~\ref{spike}, \ref{autoregression} i~\ref{threshold}.
+Obserwacja jest raportowana jako anomalia, jeśli dowolny z tych wskaźników zwróci, że obserwacja jest anomalią.
+Zarówno autoregresja, jak i wskaźnik nagłych wzrostów są użyte z oknem długości 20 pomiarów (60 godzin).
+
+\subsection{Odrzucone rozwiązania}\label{subsec:odrzucone-rozwiazania}
+Zamiast klasycznej analizy statystycznej, moglibyśmy również spróbować znanych metod uczenia maszynowego, przykładowo sieci neuronowych.
+Jednakże te metody często nie radzą sobie z danymi o wysokim poziomie szumu, a właśnie z takimi mamy do czynienia w naszym przypadku.
+Co więcej, przy zastosowaniu analizy statystycznej, nie istnieje problem z interpretowalnością wyników.
+Zagraniczne korporacje takie jak Facebook nadal używają klasycznych metod statystycznych do wykrywania anomalii \cite{Prophet}, chociaż pojawiają się próby zaadaptowania do współczesnych metod uczenia maszynowego \cite{Neuralprophet}.
+
+Istniejące, bardziej skomplikowane rozwiązania takie jak Prophet Facebooka~\cite{Prophet} skupiają się głównie na wahaniach sezonowych (np.\ weekendy/święta Bożego narodzenia), ponieważ są one przeznaczone dla systemów o dużej skali i nie ma tam konieczności rozpoznania wszystkich anomalii.
+W naszym przypadku wahania sezonowe mają znaczenie drugorzędne — mimo że zwykle możemy spodziewać się opadów śniegu w zimie, to nie możemy na tym polegać, gdyż nadmierne obciążenia mogą powstać z innej przyczyny i nadal być niebezpieczne.
+
+
 \section{Realizacja}
+
 \subsection{Rozwiązanie porównawcze}
 Punktem odniesienia będzie bardzo proste rozwiązanie, które stwierdza, że jeśli różnica kolejnych dwóch pomiarów była większa od 25 mm, to było to zastawienie.
-\subsection{Implementacja}
-Eksploracja danych i trenowanie zostały wykonane w języku programowania Python przy użyciu biblioteki ADTK \cite{ADTK} wydanej w 2019 roku. Następnie, po wytrenowaniu parametrów, program został przepisany na język C++ do postaci prostej biblioteki implementującej wskaźniki wymienione w sekcji \ref{solution}.
 
-Takie rozwiązanie wykrywa zmiany zastawienia. By sprawdzić, czy urządzenie jest w aktualnym momencie zastawione, utrzymujemy licznik zastawienia, który się zmienia wraz z wykrytym zastawieniem.
+\subsection{Implementacja}
+Eksploracja danych i trenowanie zostały wykonane w języku programowania Python przy użyciu biblioteki ADTK \cite{ADTK} wydanej w 2019 roku.
+Następnie, po wytrenowaniu parametrów, program został przepisany na język C++ do postaci prostej biblioteki implementującej wskaźniki wymienione w sekcji \ref{solution}.
+
+Takie rozwiązanie wykrywa zmiany zastawienia.
+By sprawdzić, czy urządzenie jest w aktualnym momencie zastawione, model utrzymuje licznik, który sumuje wykryte zastawieniem.
+
 \subsection{Tabela krzyżowa}
-\begin{tabular}{|l||*{2}{c|}}\hline
-\backslashbox{Nowy}{Porównawczy}
-&\makebox[6em]{Brak}&\makebox[6em]{Zastawienie}\\\hline
-Brak &84.0739\%&0.2156\%\\\hline
-Zastawienie &9.8976\%&5.8130\%\\\hline
+\begin{tabular}{|l||*{2}{c|}}
+    \hline
+    \backslashbox{Nowy}{Porównawczy}
+    & \makebox[6em]{Brak} & \makebox[6em]{Zastawienie} \\\hline
+    Brak        & 82.7855\%           & 0.4395\%                   \\\hline
+    Zastawienie & 10.6987\%           & 6.0762\%                   \\\hline
 \end{tabular}
 
 
-Nowy model wykrywa około 3 razy więcej zastawień na danych testowych niż porównawczy model. Modele zgadzają się ok. 90\% przypadków. 98\% z pozostałych 10\% to nowowykryte zastawienia.
-\subsection{Przykłady}\label{exampless}
-Wykorzystujemy te same przykłady co w \ref{examples}.
+Nowy model wykrywa około 3 razy więcej zastawień na danych testowych niż porównawczy model.
+Modele zgadzają się ok.\ 90\% przypadków.
+98\% z pozostałych 10\% to nowowykryte zastawienia.
 
-\includegraphics[width=0.9\textwidth]{summary_dev_11.png}
+\subsection{Omówienie wybranych przypadków}
+Na rysunku~\ref{fig:example812} widać, że zastawienie na poziomie 15mm zostało precyzyjnie zidentyfikowane przez model i odpowiednio skorygowane.
+Nie byłoby to możliwe, gdybyśmy użyli prostszego modelu.
+Poza tym udało się poprawnie odtworzyć wysokość i dynamikę zastawienia np.\ w okresie listopada 2019.
 
-Jedyna anomalia na wysokości 6mm została wykryta i poprawiona.
+Na rysunku~\ref{fig:example305} jest pokazane, że nawet w warunkach silnego zaburzenia pomiarów jesteśmy w stanie odzyskać dynamikę odgięcia dachu.
+Szczególnie jest to widoczne w zimie roku 2021.
+Natomiast na początku działania czujnika, model zaklasyfikował zmiany z września 2018 roku, jako możliwe ugięcia, podczas gdy jest to oczywiście zastawienie.
+Gdyby użyć w tym przypadku wskaźnika zmiany poziomu z~\ref{levelshift}, to porównałby kroczące mediany z sąsiednich okien, poprawnie identyfikując incydent jako zmianę zastawienia.
+Z drugiej zaraportowanie nastąpiłoby z opóźnieniem, co ogranicza praktyczność użycia tego rozwiązania.
 
-\includegraphics[width=0.9\textwidth]{summary_dev_12.png}
 
-Anomalia na wysokości 120mm została wykryta i poprawiona.
-
-\includegraphics[width=0.9\textwidth]{summary_dev_13.png}
-
-Anomalie na wysokości powyżej 100mm zostały wykryte i poprawione.
-
-\includegraphics[width=0.9\textwidth]{summary_dev_50.png}
-
-Oczywiste anomalie powyżej 25 mm zostały wykryte i poprawione, a także seria spike'ów od 5 do 25mm.
-
-\includegraphics[width=0.9\textwidth]{summary_dev_400.png}
-
-Oczywiste anomalie powyżej 25 mm zostały usunięte, ale także pojedyncze nagłe wzrosty.
-
-\includegraphics[width=0.9\textwidth]{summary_dev_812.png}
-
-Oczywiste anomalie zostały usunięte, zmiana poziomu została poprawnie skorygowana.
 
 \section{Podsumowanie}
-Opracowaliśmy działające rozwiązanie, dysponując narzędziami zgodnymi z aktualnym stanem wiedzy statystycznej. Pozwoliło to uniknąć problemów, z którymi się borykało poprzednie rozwiązanie. Najlepiej widać to na ostatnim rysunku w Sekcji \ref{exampless}.
+Używając narzędzi zgodnymi z aktualnym stanem wiedzy statystycznej, opracowaliśmy działające program wykrywający i korygujący błędy.
 
-Stworzony model możemy ulepszyć dokładając do komponentu AR, dodatkowo MA. Wymaga to jednak zapewnienia, że szereg czasowy jest stacjonarny, czego nie możemy być pewni. Zatem najpierw musimy ciąg zróżnicować odpowiednio wiele razy aż stanie się stacjonarny. Taki wariant modelu ARMA nazywa się ARIMA. Szerszy opis tej metody znajduje się w pracy Boxa i Jenkinsa z 2015 roku \cite{arima}.
+Stworzony model możemy ulepszyć, dokładając do komponentu AR, dodatkowo MA. Wymaga to jednak zapewnienia, że szereg czasowy jest stacjonarny, czego nie możemy być pewni.
+Zatem najpierw musimy zróżnicować ciąg odpowiednio wiele razy, aż stanie się stacjonarny.
+Taki wariant modelu ARMA nazywa się ARIMA\@.
+Szerszy opis tej metody znajduje się w pracy Boxa i Jenkinsa z 2015 roku~\cite{arima}.
 
-Utrzymywanie licznika obstrukcji w sposób addytywny jest trudne, ponieważ niesie ryzyko akumulowania addytywnych błędów z czasem. Gdybyśmy jednak chcieli utrzymywać obstrukcję w sposób addytywny, moglibyśmy zaaplikować Filtr Kalmana, używany do korygowania akumulowanych błędów w żyroskopach.
+Utrzymywanie licznika obstrukcji w sposób addytywny jest trudne, ponieważ niesie ryzyko akumulowania addytywnych błędów z czasem.
+Gdybyśmy jednak chcieli utrzymywać obstrukcję w sposób addytywny, moglibyśmy zaaplikować Filtr Kalmana, używany do korygowania akumulowanych błędów w żyroskopach.
