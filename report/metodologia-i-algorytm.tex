@@ -34,7 +34,7 @@ Po poszeregowaniu historycznych danych na kwartyle $Q_1, Q_2, Q_3, Q_4$, definiu
 Następnie jesteśmy w stanie wykonać prosty Interquartile range test -- sprawdzamy, czy analizowany pomiar jest pomiędzy $Q_1 - c \cdot \mathit{IQR}$ i $Q_3 + c \cdot \mathit{IQR}$, gdzie $c$ to dopuszczalny margines.
 W naszym przypadku przyjęliśmy $c=6$, by tolerować szeroki zakres obserwacji.
 
-\subsection{Zmiana poziomu}\label[]{levelshift}
+\subsection{Zmiana poziomu}\label{levelshift}
 Zmiana poziomu (ang.\ \emph{level shift}) jest jednym z głównych typów anomalii analizowanych w pracy \cite{https://doi.org/10.1002/for.3980070102}.
 By wykrywać takie anomalie, używa się podwójnego przesuwnego okna.
 Podwójne przesuwne okno jest parametryzowane przez $d$, oznaczające długość skrzydła.
@@ -121,6 +121,7 @@ Modele zgadzają się ok.\ 90\% przypadków.
 98\% z pozostałych 10\% to nowowykryte zastawienia.
 
 \subsection{Omówienie wybranych przypadków}
+\subsubsection{Analiza na podstawie historycznych danych}
 Na rysunku~\ref{fig:example812} widać, że zastawienie na poziomie 15mm zostało precyzyjnie zidentyfikowane przez model i odpowiednio skorygowane.
 Nie byłoby to możliwe, gdybyśmy użyli prostszego modelu.
 Poza tym udało się poprawnie odtworzyć wysokość i dynamikę zastawienia np.\ w okresie listopada 2019.
@@ -130,6 +131,8 @@ Szczególnie jest to widoczne w zimie roku 2021.
 Natomiast na początku działania czujnika, model zaklasyfikował zmiany z września 2018 roku, jako możliwe ugięcia, podczas gdy jest to oczywiście zastawienie.
 Gdyby użyć w tym przypadku wskaźnika zmiany poziomu z~\ref{levelshift}, to porównałby kroczące mediany z sąsiednich okien, poprawnie identyfikując incydent jako zmianę zastawienia.
 Z drugiej zaraportowanie nastąpiłoby z opóźnieniem, co ogranicza praktyczność użycia tego rozwiązania.
+\subsubsection{Analiza na podstawie wygenerowanych danych}
+
 
 
 
